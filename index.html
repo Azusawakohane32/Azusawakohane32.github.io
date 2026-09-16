@@ -1,135 +1,166 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>一元二次方程求解器（根式版）</title>
+    <title>数学计算器</title>
     <style>
-        *{box-sizing: border-box;font-family: system-ui}
-        body{
-            background:#f0f4f8;
-            display:flex;
-            justify-content:center;
-            align-items:center;
-            min-height:100vh;
-            margin:0;
-        }
-        .box{
-            background:white;
-            padding:30px;
-            border-radius:12px;
-            box-shadow:0 4px 12px #00000022;
-            width:440px;
-        }
-        h2{text-align:center;color:#2c3e50;margin-top:0}
-        .row{margin:12px 0}
-        label{display:inline-block;width:45px}
-        input{
-            padding:8px;
-            width:180px;
-            font-size:16px;
-            border:1px solid #aaa;
-            border-radius:6px;
-        }
-        button{
-            width:100%;
-            padding:12px;
-            font-size:17px;
-            background:#2563eb;
-            color:white;
-            border:none;
-            border-radius:8px;
-            cursor:pointer;
-        }
-        button:hover{background:#1d4ed8}
-        #result{
-            margin-top:18px;
-            padding:14px;
-            background:#f8fafc;
-            border-radius:8px;
-            font-size:17px;
-            white-space:pre-line;
-            line-height:1.6;
-        }
+        *{box-sizing:border-box;margin:0;padding:0;font-family:Arial}
+        body{background:#f0f4f8;padding:40px 20px;}
+        .container{max-width:480px;margin:0 auto;background:#fff;padding:30px;border-radius:14px;box-shadow:0 3px 12px #ccc;text-align:center;}
+        h1{margin-bottom:30px;color:#2c3e50;font-size:24px;}
+        .btn{width:100%;padding:16px;font-size:18px;margin:10px 0;border:none;border-radius:8px;background:#2563eb;color:white;cursor:pointer;}
+        .btn:hover{background:#1d4ed8;}
+        .page{display:none;}
+        .active{display:block;}
+        .item{margin:14px 0;text-align:left;}
+        label{display:inline-block;width:42px;}
+        input{padding:9px;width:220px;font-size:16px;}
+        #eq_result,#fn_result{margin-top:18px;font-size:17px;line-height:1.8;}
+        .back{background:#64748b;margin-top:20px;}
     </style>
 </head>
 <body>
-<div class="box">
-    <h2>一元二次方程 ax²+bx+c=0</h2>
-    <div class="row">
-        <label>a =</label>
-        <input type="number" id="a" placeholder="輸入a">
+<div class="container">
+    <!-- 首页选择页面 -->
+    <div id="home" class="page active">
+        <h1>数学计算器</h1>
+        <button class="btn" onclick="showPage('eq')">一元二次方程</button>
+        <button class="btn" onclick="showPage('func')">二次函数</button>
     </div>
-    <div class="row">
-        <label>b =</label>
-        <input type="number" id="b" placeholder="輸入b">
+
+    <!-- 一元二次方程页面 -->
+    <div id="eq" class="page">
+        <h2>一元二次方程 ax²+bx+c=0</h2>
+        <div class="item">
+            <label>a =</label>
+            <input type="number" id="eq_a">
+        </div>
+        <div class="item">
+            <label>b =</label>
+            <input type="number" id="eq_b">
+        </div>
+        <div class="item">
+            <label>c =</label>
+            <input type="number" id="eq_c">
+        </div>
+        <button class="btn" onclick="calcEquation()">计算</button>
+        <div id="eq_result"></div>
+        <button class="btn back" onclick="showPage('home')">返回首页</button>
     </div>
-    <div class="row">
-        <label>c =</label>
-        <input type="number" id="c" placeholder="輸入c">
+
+    <!-- 二次函数页面 -->
+    <div id="func" class="page">
+        <h2>二次函数 y=ax²+bx+c</h2>
+        <div class="item">
+            <label>a =</label>
+            <input type="number" id="fn_a">
+        </div>
+        <div class="item">
+            <label>b =</label>
+            <input type="number" id="fn_b">
+        </div>
+        <div class="item">
+            <label>c =</label>
+            <input type="number" id="fn_c">
+        </div>
+        <button class="btn" onclick="calcFunction()">计算</button>
+        <div id="fn_result"></div>
+        <button class="btn back" onclick="showPage('home')">返回首页</button>
     </div>
-    <br>
-    <button onclick="solve()">計算方程解</button>
-    <div id="result"></div>
 </div>
 
 <script>
-// 化簡根號函數，例如 sqrt(12) → "2√3"
-function simplifySqrt(n){
-    if(n<0) return "";
-    if(n===0) return "0";
-    let factor = 1;
-    for(let i=2;i*i<=n;i++){
-        while(n%(i*i)===0){
-            factor *= i;
-            n = n/(i*i);
-        }
+//页面切换
+function showPage(id){
+    let allPages = document.querySelectorAll('.page');
+    for(let i=0;i<allPages.length;i++){
+        allPages[i].classList.remove('active');
     }
-    if(n===1) return factor.toString();
-    if(factor===1) return "√"+n;
-    return factor+"√"+n;
+    document.getElementById(id).classList.add('active');
 }
 
-// 求最大公因數，用來約分
-function gcd(a,b){
-    while(b!==0){
-        let temp = b;
-        b = a % b;
-        a = temp;
-    }
-    return Math.abs(a);
+//格式化数字：整数就去掉小数点尾巴，小数保留2位
+function formatNum(n){
+    if(Number.isInteger(n)) return n.toString();
+    return n.toFixed(2);
 }
 
-function solve(){
-    let a = parseFloat(document.getElementById('a').value);
-    let b = parseFloat(document.getElementById('b').value);
-    let c = parseFloat(document.getElementById('c').value);
-    let res = document.getElementById("result");
-
-    if(isNaN(a)||isNaN(b)||isNaN(c)){
-        res.innerText = "請輸入有效的數字！";
-        return;
+//处理根号：能开方返回整数，不能返回√数字
+function getSqrtStr(val){
+    let s = Math.sqrt(val);
+    if(Number.isInteger(s)){
+        return s.toString();
+    }else{
+        return `√${val}`;
     }
+}
+
+//一元二次方程计算
+function calcEquation(){
+    let a = Number(document.getElementById('eq_a').value);
+    let b = Number(document.getElementById('eq_b').value);
+    let c = Number(document.getElementById('eq_c').value);
+    let res = document.getElementById('eq_result');
     if(a === 0){
-        res.innerText = "a=0，不是一元二次方程，是一次方程";
+        res.innerHTML = "️a不能为0，不是一元二次方程";
         return;
     }
     let delta = b*b - 4*a*c;
-    let deno = 2*a;
-
-    if(delta > 0){
-        let sqrtD = simplifySqrt(delta);
-        let numerator1 = -b;
-        let numerator2 = delta;
-        // 約分
-        let g = gcd(numerator1, deno);
-        let g2 = gcd(2, deno);
-        res.innerText = `判別式 Δ = ${delta}\n兩個不同實根：\nx₁ = (${-b} + ${sqrtD}) ÷ ${deno}\nx₂ = (${-b} − ${sqrtD}) ÷ ${deno}`;
-    }else if(delta === 0){
-        let x = -b/(2*a);
-        res.innerText = `判別式 Δ = ${delta}\n兩個相等實根：\nx₁ = x₂ = ${x}`;
+    let txt = `Δ = ${formatNum(delta)}<br>`;
+    if(delta>0){
+        let sqrtD = getSqrtStr(delta);
+        if(sqrtD.includes("√")){
+            txt += `两个实根：<br>x₁ = (-${b}+${sqrtD})/(2×${a})<br>x₂ = (-${b}-${sqrtD})/(2×${a})`;
+        }else{
+            let x1 = (-b + Number(sqrtD))/(2*a);
+            let x2 = (-b - Number(sqrtD))/(2*a);
+            txt += `两个实根：x₁=${formatNum(x1)}，x₂=${formatNum(x2)}`;
+        }
+    }else if(delta===0){
+        let x0 = -b/(2*a);
+        txt += `一个实根（重根）：x=${formatNum(x0)}`;
     }else{
-        res.innerText = `判別式 Δ = ${delta} < 0\n沒有實數根，只有複數根`;
+        txt += "无实数根（Δ＜0）";
     }
+    res.innerHTML = txt;
+}
+
+//二次函数计算
+function calcFunction(){
+    let a = Number(document.getElementById('fn_a').value);
+    let b = Number(document.getElementById('fn_b').value);
+    let c = Number(document.getElementById('fn_c').value);
+    let res = document.getElementById('fn_result');
+    if(a === 0){
+        res.innerHTML = "️a不能为0，不是二次函数";
+        return;
+    }
+    let delta = b*b - 4*a*c;
+    let axis = -b/(2*a);
+    let vertexY = a*axis*axis + b*axis + c;
+    let open = a>0 ? "向上" : "向下";
+    let txt = "";
+    txt += `开口方向：${open}<br>`;
+    txt += `对称轴：x = ${formatNum(axis)}<br>`;
+    txt += `顶点：(${formatNum(axis)}, ${formatNum(vertexY)})<br>`;
+    txt += `Δ = ${formatNum(delta)}<br>`;
+
+    if(delta>0){
+        let sqrtD = getSqrtStr(delta);
+        if(sqrtD.includes("√")){
+            txt += `与x轴交点：<br>(${`(-${b}+${sqrtD})/(2×${a})`}, 0)<br>(${`(-${b}-${sqrtD})/(2×${a})`}, 0)`;
+        }else{
+            let x1 = (-b + Number(sqrtD))/(2*a);
+            let x2 = (-b - Number(sqrtD))/(2*a);
+            txt += `与x轴交点：(${formatNum(x1)},0)、(${formatNum(x2)},0)`;
+        }
+    }else if(delta===0){
+        let x0 = -b/(2*a);
+        txt += `与x轴交点（顶点）：(${formatNum(x0)},0)`;
+    }else{
+        txt += `与x轴没有交点`;
+    }
+    res.innerHTML = txt;
 }
 </script>
 </body>
