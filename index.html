@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -7,7 +7,7 @@
         *{box-sizing:border-box;margin:0;padding:0;font-family:Arial}
         body{background:#f0f4f8;padding:40px 20px;}
         .container{max-width:480px;margin:0 auto;background:#fff;padding:30px;border-radius:14px;box-shadow:0 3px 12px #ccc;text-align:center;}
-        h1{margin-bottom:30px;color:#2c3e50;font-size:24px;}
+        h1{margin-bottom:20px;color:#2c3e50;font-size:24px;}
         .btn{width:100%;padding:16px;font-size:18px;margin:10px 0;border:none;border-radius:8px;background:#2563eb;color:white;cursor:pointer;}
         .btn:hover{background:#1d4ed8;}
         .page{display:none;}
@@ -15,17 +15,37 @@
         .item{margin:14px 0;text-align:left;}
         label{display:inline-block;width:42px;}
         input{padding:9px;width:220px;font-size:16px;}
-        #eq_result,#fn_result{margin-top:18px;font-size:17px;line-height:1.8;}
+        #eq_result,#fn_result,#line_result{margin-top:18px;font-size:17px;line-height:1.8;text-align:left;}
         .back{background:#64748b;margin-top:20px;}
+        /* 草稿框样式 */
+        .draft-area{
+            width:100%;
+            height:140px;
+            padding:10px;
+            font-size:15px;
+            border:1px solid #cbd5e1;
+            border-radius:8px;
+            resize:vertical;
+            margin:15px 0;
+        }
+        .draft-title{
+            text-align:left;
+            font-weight:bold;
+            color:#334155;
+        }
     </style>
 </head>
 <body>
 <div class="container">
-    <!-- 首页选择页面 -->
+    <!-- 首页选择页面，新增草稿框 -->
     <div id="home" class="page active">
         <h1>数学计算器</h1>
+        <p class="draft-title"> 草稿区（切换页面不会清空）</p >
+        <textarea class="draft-area" id="draftBox" placeholder="在这里写计算笔记、抄答案..."></textarea>
+
         <button class="btn" onclick="showPage('eq')">一元二次方程</button>
         <button class="btn" onclick="showPage('func')">二次函数</button>
+        <button class="btn" onclick="showPage('line')">一次函数</button>
     </div>
 
     <!-- 一元二次方程页面 -->
@@ -65,6 +85,22 @@
         </div>
         <button class="btn" onclick="calcFunction()">计算</button>
         <div id="fn_result"></div>
+        <button class="btn back" onclick="showPage('home')">返回首页</button>
+    </div>
+
+    <!-- 一次函数页面 -->
+    <div id="line" class="page">
+        <h2>一次函数 y=kx+b</h2>
+        <div class="item">
+            <label>k =</label>
+            <input type="number" id="line_k">
+        </div>
+        <div class="item">
+            <label>b =</label>
+            <input type="number" id="line_b">
+        </div>
+        <button class="btn" onclick="calcLine()">计算</button>
+        <div id="line_result"></div>
         <button class="btn back" onclick="showPage('home')">返回首页</button>
     </div>
 </div>
@@ -161,6 +197,41 @@ function calcFunction(){
         txt += `与x轴没有交点`;
     }
     res.innerHTML = txt;
+}
+
+//一次函数计算
+function calcLine(){
+    let k = Number(document.getElementById('line_k').value);
+    let b = Number(document.getElementById('line_b').value);
+    let res = document.getElementById('line_result');
+    if(k === 0){
+        res.innerHTML = "️k不能为0，不是一次函数（是常数函数）";
+        return;
+    }
+    let txt = `函数：y=${formatNum(k)}x + ${formatNum(b)}<br>`;
+    if(k>0){
+        txt += `增减性：y随x增大而增大<br>`;
+    }else{
+        txt += `增减性：y随x增大而减小<br>`;
+    }
+    let xCross = -b/k;
+    let yCross = b;
+    txt += `与x轴交点：(${formatNum(xCross)}, 0)<br>`;
+    txt += `与y轴交点：(0, ${formatNum(yCross)})`;
+    res.innerHTML = txt;
+}
+
+// 【可选进阶】开启本地储存：刷新网页草稿文字也不会消失
+window.onload = function(){
+    //读取浏览器本地保存的草稿
+    let savedDraft = localStorage.getItem("calcDraft");
+    if(savedDraft){
+        document.getElementById("draftBox").value = savedDraft;
+    }
+    //每次输入草稿，自动保存
+    document.getElementById("draftBox").addEventListener("input", function(){
+        localStorage.setItem("calcDraft", this.value);
+    })
 }
 </script>
 </body>
