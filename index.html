@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -8,6 +8,7 @@
         body{background:#f0f4f8;padding:40px 20px;}
         .container{max-width:480px;margin:0 auto;background:#fff;padding:30px;border-radius:14px;box-shadow:0 3px 12px #ccc;text-align:center;}
         h1{margin-bottom:20px;color:#2c3e50;font-size:24px;}
+        h2{margin-bottom:20px;font-size:20px;color:#2c3e50;}
         .btn{width:100%;padding:16px;font-size:18px;margin:10px 0;border:none;border-radius:8px;background:#2563eb;color:white;cursor:pointer;}
         .btn:hover{background:#1d4ed8;}
         .page{display:none;}
@@ -15,9 +16,8 @@
         .item{margin:14px 0;text-align:left;}
         label{display:inline-block;width:42px;}
         input{padding:9px;width:220px;font-size:16px;}
-        #eq_result,#fn_result,#line_result{margin-top:18px;font-size:17px;line-height:1.8;text-align:left;}
+        #eq_result,#fn_result,#line_result,#tri_result,#one_result,#two_result,#factor_result,#pyth_result{margin-top:18px;font-size:17px;line-height:1.8;text-align:left;}
         .back{background:#64748b;margin-top:20px;}
-        /* 草稿框样式 */
         .draft-area{
             width:100%;
             height:140px;
@@ -33,22 +33,59 @@
             font-weight:bold;
             color:#334155;
         }
+             /* 自定义符号键盘 */
+.keyboard{
+  display:grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap:6px;
+  margin:12px 0;
+}
+.key-btn{
+  padding:10px 4px;
+  font-size:18px;
+  border-radius:6px;
+  border:1px solid #94a3b8;
+  background:#e2e8f0;
+  cursor:pointer;
+}
+.key-btn:hover{background:#cbd5e1;}
     </style>
 </head>
 <body>
 <div class="container">
-    <!-- 首页选择页面，新增草稿框 -->
+    <!-- 首页 -->
     <div id="home" class="page active">
         <h1>数学计算器</h1>
         <p class="draft-title"> 草稿区（切换页面不会清空）</p >
         <textarea class="draft-area" id="draftBox" placeholder="在这里写计算笔记、抄答案..."></textarea>
 
+         <button class="btn" onclick="showPage('one')">一元一次方程</button>
         <button class="btn" onclick="showPage('eq')">一元二次方程</button>
-        <button class="btn" onclick="showPage('func')">二次函数</button>
+        <button class="btn" onclick="showPage('two')">二元一次方程组</button>
+        <button class="btn" onclick="showPage('tri')">三元一次方程组</button>
         <button class="btn" onclick="showPage('line')">一次函数</button>
+        <button class="btn" onclick="showPage('func')">二次函数</button>
+        <button class="btn" onclick="showPage('factor')">因式分解</button>
+        <button class="btn" onclick="showPage('pyth')">勾股定理验证</button>
     </div>
 
-    <!-- 一元二次方程页面 -->
+    <!-- 一元一次方程 ax+b=0 -->
+    <div id="one" class="page">
+        <h2>一元一次方程 ax + b = 0</h2>
+        <div class="item">
+            <label>a =</label>
+            <input type="number" id="one_a">
+        </div>
+        <div class="item">
+            <label>b =</label>
+            <input type="number" id="one_b">
+        </div>
+        <button class="btn" onclick="calcOneEqu()">计算</button>
+        <div id="one_result"></div>
+        <button class="btn back" onclick="showPage('home')">返回首页</button>
+    </div>
+
+    <!-- 一元二次方程 -->
     <div id="eq" class="page">
         <h2>一元二次方程 ax²+bx+c=0</h2>
         <div class="item">
@@ -68,7 +105,76 @@
         <button class="btn back" onclick="showPage('home')">返回首页</button>
     </div>
 
-    <!-- 二次函数页面 -->
+    <!-- 二元一次方程组 -->
+    <div id="two" class="page">
+        <h2>二元一次方程组</h2>
+        <div style="text-align:left;margin-bottom:8px;">
+            a₁x+b₁y=c₁<br>
+            a₂x+b₂y=c₂
+        </div>
+        <div class="item">
+            <label>a₁=</label><input type="number" id="t2_1a">
+            <label>b₁=</label><input type="number" id="t2_1b">
+            <label>c₁=</label><input type="number" id="t2_1c">
+        </div>
+        <div class="item">
+            <label>a₂=</label><input type="number" id="t2_2a">
+            <label>b₂=</label><input type="number" id="t2_2b">
+            <label>c₂=</label><input type="number" id="t2_2c">
+        </div>
+        <button class="btn" onclick="calcTwoSystem()">计算</button>
+        <div id="two_result"></div>
+        <button class="btn back" onclick="showPage('home')">返回首页</button>
+    </div>
+
+    <!-- 三元一次方程组 -->
+    <div id="tri" class="page">
+        <h2>三元一次方程组</h2>
+        <div style="text-align:left;margin-bottom:8px;">
+            a₁x+b₁y+c₁z=d₁<br>
+            a₂x+b₂y+c₂z=d₂<br>
+            a₃x+b₃y+c₃z=d₃
+        </div>
+        <div class="item">
+            <label>a₁=</label><input type="number" id="t1a">
+            <label>b₁=</label><input type="number" id="t1b">
+            <label>c₁=</label><input type="number" id="t1c">
+            <label>d₁=</label><input type="number" id="t1d">
+        </div>
+        <div class="item">
+            <label>a₂=</label><input type="number" id="t2a">
+            <label>b₂=</label><input type="number" id="t2b">
+            <label>c₂=</label><input type="number" id="t2c">
+            <label>d₂=</label><input type="number" id="t2d">
+        </div>
+        <div class="item">
+            <label>a₃=</label><input type="number" id="t3a">
+            <label>b₃=</label><input type="number" id="t3b">
+            <label>c₃=</label><input type="number" id="t3c">
+            <label>d₃=</label><input type="number" id="t3d">
+        </div>
+        <button class="btn" onclick="calcTriSystem()">计算</button>
+        <div id="tri_result"></div>
+        <button class="btn back" onclick="showPage('home')">返回首页</button>
+    </div>
+
+    <!-- 一次函数 -->
+    <div id="line" class="page">
+        <h2>一次函数 y=kx+b</h2>
+        <div class="item">
+            <label>k =</label>
+            <input type="number" id="line_k">
+        </div>
+        <div class="item">
+            <label>b =</label>
+            <input type="number" id="line_b">
+        </div>
+        <button class="btn" onclick="calcLine()">计算</button>
+        <div id="line_result"></div>
+        <button class="btn back" onclick="showPage('home')">返回首页</button>
+    </div>
+
+    <!-- 二次函数 -->
     <div id="func" class="page">
         <h2>二次函数 y=ax²+bx+c</h2>
         <div class="item">
@@ -88,19 +194,47 @@
         <button class="btn back" onclick="showPage('home')">返回首页</button>
     </div>
 
-    <!-- 一次函数页面 -->
-    <div id="line" class="page">
-        <h2>一次函数 y=kx+b</h2>
+    <!-- 因式分解（二次三项式 ax²+bx+c） -->
+    <div id="factor" class="page">
+        <h2>因式分解 ax²+bx+c</h2>
         <div class="item">
-            <label>k =</label>
-            <input type="number" id="line_k">
+            <label>a =</label>
+            <input type="number" id="fac_a">
         </div>
         <div class="item">
             <label>b =</label>
-            <input type="number" id="line_b">
+            <input type="number" id="fac_b">
         </div>
-        <button class="btn" onclick="calcLine()">计算</button>
-        <div id="line_result"></div>
+        <div class="item">
+            <label>c =</label>
+            <input type="number" id="fac_c">
+        </div>
+        <button class="btn" onclick="calcFactor()">分解</button>
+        <div id="factor_result"></div>
+        <button class="btn back" onclick="showPage('home')">返回首页</button>
+    </div>
+
+    <!-- 勾股定理 a²+b²=c² -->
+    <div id="pyth" class="page">
+        <h2>勾股定理验证</h2>
+        <div style="text-align:left;margin-bottom:8px;">
+            a² + b² = c²<br>
+            a、b直角边，c斜边
+        </div>
+        <div class="item">
+            <label>a =</label>
+            <input type="number" id="py_a">
+        </div>
+        <div class="item">
+            <label>b =</label>
+            <input type="number" id="py_b">
+        </div>
+        <div class="item">
+            <label>c =</label>
+            <input type="number" id="py_c">
+        </div>
+        <button class="btn" onclick="calcPyth()">计算/验证</button>
+        <div id="pyth_result"></div>
         <button class="btn back" onclick="showPage('home')">返回首页</button>
     </div>
 </div>
@@ -115,13 +249,13 @@ function showPage(id){
     document.getElementById(id).classList.add('active');
 }
 
-//格式化数字：整数就去掉小数点尾巴，小数保留2位
+//格式化数字：整数去掉小数点
 function formatNum(n){
     if(Number.isInteger(n)) return n.toString();
     return n.toFixed(2);
 }
 
-//处理根号：能开方返回整数，不能返回√数字
+//根号处理
 function getSqrtStr(val){
     let s = Math.sqrt(val);
     if(Number.isInteger(s)){
@@ -131,7 +265,24 @@ function getSqrtStr(val){
     }
 }
 
-//一元二次方程计算
+//一元一次方程 ax+b=0
+function calcOneEqu(){
+    let a = Number(document.getElementById("one_a").value);
+    let b = Number(document.getElementById("one_b").value);
+    let res = document.getElementById("one_result");
+    if(a === 0){
+        if(b === 0){
+            res.innerHTML = "♾️ 有无穷多解";
+        }else{
+            res.innerHTML = " 无解";
+        }
+        return;
+    }
+    let x = -b / a;
+    res.innerHTML = `x = ${formatNum(x)}`;
+}
+
+//一元二次方程
 function calcEquation(){
     let a = Number(document.getElementById('eq_a').value);
     let b = Number(document.getElementById('eq_b').value);
@@ -161,7 +312,128 @@ function calcEquation(){
     res.innerHTML = txt;
 }
 
-//二次函数计算
+//二元一次方程组
+function calcTwoSystem(){
+    let a1=Number(document.getElementById("t2_1a").value);
+    let b1=Number(document.getElementById("t2_1b").value);
+    let c1=Number(document.getElementById("t2_1c").value);
+    let a2=Number(document.getElementById("t2_2a").value);
+    let b2=Number(document.getElementById("t2_2b").value);
+    let c2=Number(document.getElementById("t2_2c").value);
+    let res = document.getElementById("two_result");
+    const eps = 1e-9;
+    let D = a1*b2 - a2*b1;
+    if(Math.abs(D) > eps){
+        let x = (c1*b2 - c2*b1)/D;
+        let y = (a1*c2 - a2*c1)/D;
+        res.innerHTML = `✅唯一解<br>x=${formatNum(x)}<br>y=${formatNum(y)}`;
+    }else{
+        let Dx = c1*b2 - c2*b1;
+        let Dy = a1*c2 - a2*c1;
+        if(Math.abs(Dx)>eps || Math.abs(Dy)>eps){
+            res.innerHTML = " 无解";
+        }else{
+            res.innerHTML = "♾️ 有无穷多组解";
+        }
+    }
+}
+
+//三元一次方程组
+function calcTriSystem(){
+    let a1=Number(document.getElementById('t1a').value);
+    let b1=Number(document.getElementById('t1b').value);
+    let c1=Number(document.getElementById('t1c').value);
+    let d1=Number(document.getElementById('t1d').value);
+    let a2=Number(document.getElementById('t2a').value);
+    let b2=Number(document.getElementById('t2b').value);
+    let c2=Number(document.getElementById('t2c').value);
+    let d2=Number(document.getElementById('t2d').value);
+    let a3=Number(document.getElementById('t3a').value);
+    let b3=Number(document.getElementById('t3b').value);
+    let c3=Number(document.getElementById('t3c').value);
+    let d3=Number(document.getElementById('t3d').value);
+    let resDom = document.getElementById("tri_result");
+
+    let mat = [
+        [a1,b1,c1,d1],
+        [a2,b2,c2,d2],
+        [a3,b3,c3,d3]
+    ];
+    const eps = 1e-9;
+
+    for(let col=0;col<3;col++){
+        let pivotRow = -1;
+        for(let r=col;r<3;r++){
+            if(Math.abs(mat[r][col])>eps){
+                pivotRow=r;break;
+            }
+        }
+        if(pivotRow === -1) continue;
+        [mat[col], mat[pivotRow]] = [mat[pivotRow], mat[col]];
+        let div = mat[col][col];
+        for(let j=col;j<4;j++) mat[col][j]/=div;
+        for(let r=0;r<3;r++){
+            if(r!==col && Math.abs(mat[r][col])>eps){
+                let factor = mat[r][col];
+                for(let j=col;j<4;j++) mat[r][j] -= factor * mat[col][j];
+            }
+        }
+    }
+
+    let noSol=false,infSol=false;
+    for(let r=0;r<3;r++){
+        let allZero = true;
+        for(let c=0;c<3;c++){
+            if(Math.abs(mat[r][c])>eps){
+                allZero=false;break;
+            }
+        }
+        if(allZero){
+            if(Math.abs(mat[r][3])>eps){
+                noSol=true;
+            }else{
+                infSol=true;
+            }
+        }
+    }
+
+    let txt="";
+    if(noSol){
+        txt=" 方程组**无解**";
+    }else if(infSol){
+        txt="♾️ 方程组**有无穷多组解**";
+    }else{
+        let x = mat[0][3];
+        let y = mat[1][3];
+        let z = mat[2][3];
+        txt = `✅ 唯一解：<br>x = ${formatNum(x)}<br>y = ${formatNum(y)}<br>z = ${formatNum(z)}`;
+    }
+    resDom.innerHTML=txt;
+}
+
+//一次函数
+function calcLine(){
+    let k = Number(document.getElementById('line_k').value);
+    let b = Number(document.getElementById('line_b').value);
+    let res = document.getElementById('line_result');
+    if(k === 0){
+        res.innerHTML = "️k不能为0，不是一次函数（是常数函数）";
+        return;
+    }
+    let txt = `函数：y=${formatNum(k)}x + ${formatNum(b)}<br>`;
+    if(k>0){
+        txt += `增减性：y随x增大而增大<br>`;
+    }else{
+        txt += `增减性：y随x增大而减小<br>`;
+    }
+    let xCross = -b/k;
+    let yCross = b;
+    txt += `与x轴交点：(${formatNum(xCross)}, 0)<br>`;
+    txt += `与y轴交点：(0, ${formatNum(yCross)})`;
+    res.innerHTML = txt;
+}
+
+//二次函数
 function calcFunction(){
     let a = Number(document.getElementById('fn_a').value);
     let b = Number(document.getElementById('fn_b').value);
@@ -199,36 +471,51 @@ function calcFunction(){
     res.innerHTML = txt;
 }
 
-//一次函数计算
-function calcLine(){
-    let k = Number(document.getElementById('line_k').value);
-    let b = Number(document.getElementById('line_b').value);
-    let res = document.getElementById('line_result');
-    if(k === 0){
-        res.innerHTML = "️k不能为0，不是一次函数（是常数函数）";
+//二次三项式因式分解 ax²+bx+c
+function calcFactor(){
+    let a = Number(document.getElementById("fac_a").value);
+    let b = Number(document.getElementById("fac_b").value);
+    let c = Number(document.getElementById("fac_c").value);
+    let res = document.getElementById("factor_result");
+    let delta = b*b - 4*a*c;
+    if(delta < 0){
+        res.innerHTML = " 在实数范围内不能因式分解";
         return;
     }
-    let txt = `函数：y=${formatNum(k)}x + ${formatNum(b)}<br>`;
-    if(k>0){
-        txt += `增减性：y随x增大而增大<br>`;
+    let s = Math.sqrt(delta);
+    let x1 = (-b+s)/(2*a);
+    let x2 = (-b-s)/(2*a);
+    if(Number.isInteger(x1) && Number.isInteger(x2)){
+        res.innerHTML = `${a}(x-${formatNum(x1)})(x-${formatNum(x2)})`;
     }else{
-        txt += `增减性：y随x增大而减小<br>`;
+        res.innerHTML = `判别式Δ=${formatNum(delta)}，无法分解成整数因式`;
     }
-    let xCross = -b/k;
-    let yCross = b;
-    txt += `与x轴交点：(${formatNum(xCross)}, 0)<br>`;
-    txt += `与y轴交点：(0, ${formatNum(yCross)})`;
+}
+
+//勾股定理 a²+b²=c²
+function calcPyth(){
+    let a = Number(document.getElementById("py_a").value);
+    let b = Number(document.getElementById("py_b").value);
+    let c = Number(document.getElementById("py_c").value);
+    let res = document.getElementById("pyth_result");
+    let left = a*a + b*b;
+    let right = c*c;
+    let txt = "";
+    txt += `a²=${formatNum(a*a)}，b²=${formatNum(b*b)}，c²=${formatNum(c*c)}<br>`;
+    if(Math.abs(left-right) < 1e-9){
+        txt += "✅ 满足勾股定理：a²+b² = c²";
+    }else{
+        txt += " 不满足勾股定理";
+    }
     res.innerHTML = txt;
 }
 
-// 【可选进阶】开启本地储存：刷新网页草稿文字也不会消失
+//草稿本地存储
 window.onload = function(){
-    //读取浏览器本地保存的草稿
     let savedDraft = localStorage.getItem("calcDraft");
     if(savedDraft){
         document.getElementById("draftBox").value = savedDraft;
     }
-    //每次输入草稿，自动保存
     document.getElementById("draftBox").addEventListener("input", function(){
         localStorage.setItem("calcDraft", this.value);
     })
